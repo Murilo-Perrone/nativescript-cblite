@@ -1,4 +1,5 @@
 import * as utils from 'tns-core-modules/utils/utils';
+import * as types from 'tns-core-modules/utils/types';
 
 import { Common } from './cblite.common';
 
@@ -62,7 +63,13 @@ export interface Manager {
 enum NATIVE_TYPES {
   Document = <any>'com.couchbase.lite.Document',
   HashMap = <any>'java.util.LinkedHashMap',
-  ArrayList = <any>'java.util.ArrayList'
+  ArrayList = <any>'java.util.ArrayList',
+  Boolean = <any>'java.lang.Boolean',
+  String = <any>'java.lang.String',
+  Integer = <any>'java.lang.Integer',
+  Long = <any>'java.lang.Long',
+  Double = <any>'java.lang.Double',
+  Short = <any>'java.lang.Short'
 }
 
 export class Utils {
@@ -80,57 +87,66 @@ export class Utils {
     }
   }
 
-  static resolveMap(data: any) {
-    
+  static mapToObject(data: any, recursive?: boolean) {
+    try {
+      if (types.isNullOrUndefined(data))
+        return data;
+
+      if (this.isPrimitive(data))
+        return data;
+
+      if (this.isJavaPrimitive(data))
+        return this.resolvePrimitiveType(data);
+
+      if (this.isArrayList(data)) {
+        const arrayListValues = [];
+        for (let prop of data.toArray())
+          arrayListValues.push(prop);
+        return arrayListValues;
+      }
+
+      if (this.isMap(data)) {
+        const properties = data.entrySet().toArray();
+        const documentData: Object = {};
+        for (let prop of properties) {
+          let key = prop.getKey();
+          let value = this.mapToObject(prop.getValue(), true);
+          documentData[key] = value;
+        }
+        return documentData;
+      }
+    } catch (e) {
+      console.error('Failed to convert Map to Object', e.message);
+      throw new Error('Failed to convert Map to Object ' + e.message)
+    }
   }
 
-  static mapToObject(data: any, recursive?: boolean) {
-    const gson = new com.google.gson.Gson()
-    return JSON.parse(gson.toJson(JSON.stringify(data), (new java.util.HashMap).getClass()));
-    // try {
-    //   if (data) {
-    //     if (!recursive && !data.getProperties())
-    //       return {};
-    //     const docContent: Object = {};
-    //     const className = data.getClass().getName();
-    //     let entrySet;
-    //     if (recursive) {
-    //       if (className == NATIVE_TYPES.HashMap) {
-    //         console.log('ClassType', NATIVE_TYPES.HashMap);
-    //         entrySet = data.entrySet();
-    //       }
-    //       if (className == NATIVE_TYPES.ArrayList) {
-    //         console.log('ClassType', NATIVE_TYPES.ArrayList);
-    //         entrySet = data;
-    //       }
-    //     } else {
-    //       entrySet = data.getProperties().entrySet();
-    //     }
-    //     for (let prop of entrySet.toArray()) {
-    //       if (prop.getClass().getName() == NATIVE_TYPES.ArrayList) {
-    //         let propList = [];
-    //         for (let subProp of prop) {
-    //           let _subProp;
-    //           if (this.isMap(subProp) || this.isArrayList(subProp))
-    //             _subProp = this.mapToObject(subProp, true);
-    //           propList.push(_subProp);
-    //         }
-    //         return propList;
-    //       }
-    //       let key = prop.getKey();
-    //       let value = prop.getValue();
-    //       if (this.isMap(value) || this.isArrayList(value))
-    //         value = this.mapToObject(value, true);
-    //       docContent[key] = value;
-    //     }
-    //     return docContent;
-    //   } else {
-    //     return {}
-    //   }
-    // } catch (e) {
-    //   console.error('Failed to convert Map to Object', e.message);
-    //   throw new Error('Failed to convert Map to Object ' + e.message)
-    // }
+  static resolvePrimitiveType(data: any): any {
+    const className = data.getClass().getName();
+    if (className == NATIVE_TYPES.Boolean)
+      return String(data) === 'true';
+    if (className == NATIVE_TYPES.String)
+      return String(data);
+    if (className == NATIVE_TYPES.Integer
+      || className == NATIVE_TYPES.Double
+      || className == NATIVE_TYPES.Long
+      || className == NATIVE_TYPES.Short)
+      return Number(data);
+  }
+
+  static isJavaPrimitive(data: any): boolean {
+    const className = data.getClass().getName();
+    return (className == NATIVE_TYPES.Boolean
+      || className == NATIVE_TYPES.String
+      || className == NATIVE_TYPES.Integer
+      || className == NATIVE_TYPES.Long
+      || className == NATIVE_TYPES.Double
+      || className == NATIVE_TYPES.Short
+    )
+  }
+
+  static isPrimitive(data: any): boolean {
+    return typeof (data) === 'boolean' || typeof (data) === 'string' || typeof (data) === 'number';
   }
 
   static isDocument(data: any): boolean {
@@ -238,7 +254,7 @@ export class CBLite extends Common {
     try {
       if (!Utils.isMap(document))
         return {};
-      return Utils.mapToObject(document);
+      return Utils.mapToObject(document.getProperties());
     } catch (e) {
       console.error('Failed to get document data', e.message);
       throw new Error('Failed to get document data ' + e.message);
