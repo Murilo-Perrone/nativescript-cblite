@@ -1,5 +1,4 @@
 import * as utils from 'tns-core-modules/utils/utils';
-import * as types from 'tns-core-modules/utils/types';
 
 import { Common } from './cblite.common';
 
@@ -87,87 +86,15 @@ export class Utils {
     }
   }
 
-  static mapToObject(data: any, recursive?: boolean) {
+  static mapToObject(data: any) {
     try {
-      if (types.isNullOrUndefined(data))
-        return data;
-
-      if (this.isPrimitive(data))
-        return data;
-
-      if (this.isJavaPrimitive(data))
-        return this.resolvePrimitiveType(data);
-
-      if (this.isArrayList(data)) {
-        const arrayListValues = [];
-        for (let prop of data.toArray())
-          arrayListValues.push(prop);
-        return arrayListValues;
-      }
-
-      if (this.isMap(data)) {
-        const properties = data.entrySet().toArray();
-        const documentData: Object = {};
-        for (let prop of properties) {
-          let key = prop.getKey();
-          let value = this.mapToObject(prop.getValue(), true);
-          documentData[key] = value;
-        }
-        return documentData;
-      }
-    } catch (e) {
-      console.error('Failed to convert Map to Object', e.message);
-      throw new Error('Failed to convert Map to Object ' + e.message)
+      const gson = new com.google.gson.Gson();
+      const mappedObject = gson.toJson(data);
+      return JSON.parse(mappedObject);
+    } catch(e) {
+      console.error('Failed to convert Object to Map', e.message);
+      throw new Error('Failed to convert Object to Map ' + e.message);
     }
-  }
-
-  static resolvePrimitiveType(data: any): any {
-    const className = data.getClass().getName();
-    if (className == NATIVE_TYPES.Boolean)
-      return String(data) === 'true';
-    if (className == NATIVE_TYPES.String)
-      return String(data);
-    if (className == NATIVE_TYPES.Integer
-      || className == NATIVE_TYPES.Double
-      || className == NATIVE_TYPES.Long
-      || className == NATIVE_TYPES.Short)
-      return Number(data);
-  }
-
-  static isJavaPrimitive(data: any): boolean {
-    const className = data.getClass().getName();
-    return (className == NATIVE_TYPES.Boolean
-      || className == NATIVE_TYPES.String
-      || className == NATIVE_TYPES.Integer
-      || className == NATIVE_TYPES.Long
-      || className == NATIVE_TYPES.Double
-      || className == NATIVE_TYPES.Short
-    )
-  }
-
-  static isPrimitive(data: any): boolean {
-    return typeof (data) === 'boolean' || typeof (data) === 'string' || typeof (data) === 'number';
-  }
-
-  static isDocument(data: any): boolean {
-    if (!data.getClass())
-      return false;
-    const className = data.getClass().getName();
-    return className == NATIVE_TYPES.Document;
-  }
-
-  static isMap(data: any): boolean {
-    if (!data.getClass())
-      return false;
-    const className = data.getClass().getName();
-    return className == NATIVE_TYPES.HashMap;
-  }
-
-  static isArrayList(data: any): boolean {
-    if (!data.getClass())
-      return false;
-    const className = data.getClass().getName();
-    return className == NATIVE_TYPES.ArrayList;
   }
 }
 
@@ -175,42 +102,61 @@ export class Replicator {
 
   private replicator: Replication;
 
+  /** Creates a new instance of a replicator */
   constructor(replicator: Replication) {
     this.replicator = replicator;
   }
 
+  /** Starts a replication */
   public start(): void {
     this.replicator.start();
   }
 
+  /** Stops a replication */
   public stop(): void {
     this.replicator.stop();
   }
 
+  /** Check if a replication is running */
   public isRunning(): boolean {
     return this.replicator.isRunning();
   }
 
+  /** Yet to be documented */
   public addReplicationChangeListener(changeListener): void {
     this.replicator.addChangeListener(changeListener);
   }
 
+  /**
+   * Setup the authentication parameters to replicate to/from a remote server.
+   * @param username Username for the remote server
+   * @param password Password for the remote server
+   */
   public setAuthenticator(username: string, password: string): void {
     this.replicator.setAuthenticator(
       new com.couchbase.lite.auth.BasicAuthenticator(username, password)
     );
   }
 
+  /**
+   * Define if the replication will be continuous or not
+   * @param continuous Boolean for continuous replication
+   */
   public setContinuous(continuous: boolean): void {
     this.replicator.setContinuous(continuous);
   }
 
+  /**
+   * Set a list of documents to replicate. If no list is set, it will replicate every document.
+   * @param docs Array of strings containing the IDs of the documents to be replicated
+   */
   public setDocumentIds(docs: string[]): void {
     const list = new java.util.ArrayList();
     docs.forEach(doc => list.add(doc));
     this.replicator.setDocIds(list);
   }
 
+  /** Not used yet */
   public setCookie(
     name: string,
     value: string,
@@ -223,6 +169,7 @@ export class Replicator {
     this.replicator.setCookie(name, value, path, date, secure, httpOnly);
   };
 
+  /** Not used yet */
   public deleteCookie(name: string): void {
     this.replicator.deleteCookie(name);
   }
@@ -234,6 +181,10 @@ export class CBLite extends Common {
   private database: Database;
   private manager: Manager;
 
+  /**
+   * Create a new instance of CBLite
+   * @param databaseName Database name
+   */
   constructor(databaseName: string) {
     super(databaseName);
     this.context = Utils.getApplicationContext();
@@ -249,11 +200,13 @@ export class CBLite extends Common {
     }
   }
 
+  /**
+   * Get a document from the local database
+   * @param documentId Document ID
+   */
   public getDocument(documentId: string): Object {
     const document: Document = this.database.getDocument(documentId);
     try {
-      if (!Utils.isMap(document))
-        return {};
       return Utils.mapToObject(document.getProperties());
     } catch (e) {
       console.error('Failed to get document data', e.message);
@@ -261,6 +214,7 @@ export class CBLite extends Common {
     }
   }
 
+  /** List all documents in the local database */
   public listAllDocuments(): string[] {
     const docList: string[] = [];
     const allDocsResult = this.database.getAllDocs(new com.couchbase.lite.QueryOptions().getAllDocsMode());
@@ -269,14 +223,17 @@ export class CBLite extends Common {
     return docList;
   }
 
+  /** List all replications created */
   public listAllReplications(): string[] {
-    const replicationList: string[] = [];
+    // const replicationList: string[] = [];
     const allReplicationsList = this.database.getAllReplications();
-    // for (let prop of allReplicationsList.get('rows').toArray())
-    //   replicationList.push(prop);
     return allReplicationsList;
   }
 
+  /**
+   * Add a listener to any changes in the local database
+   * @param callback Callback to call after a change
+   */
   public addDatabaseChangeListener(callback: any): void {
     try {
       this.database.addChangeListener(new com.couchbase.lite.Database.ChangeListener({
@@ -291,6 +248,11 @@ export class CBLite extends Common {
     }
   }
 
+  /**
+   * Create a document in the local database
+   * @param data Data object to be converted to a document
+   * @param documentId Document ID to be created
+   */
   public createDocument(data: Object, documentId?: string): string {
     let _documentId: string = '';
     let document: Document;
@@ -312,11 +274,16 @@ export class CBLite extends Common {
     }
   }
 
+  /**
+   * Update a document in the local database
+   * @param documentId Document ID to be updated
+   * @param data Data object to be converted and updated to the document
+   */
   public updateDocument(documentId: string, data: any): void {
     let document: Document = this.database.getDocument(documentId);
     let temp: any = Utils.mapToObject(document);
-    // data._id = temp._id;
-    // data._rev = temp._rev;
+    data._id = temp._id;
+    data._rev = temp._rev;
     try {
       document.putProperties(Utils.objectToMap(data));
     } catch (e) {
@@ -325,6 +292,10 @@ export class CBLite extends Common {
     }
   }
 
+  /**
+   * Delete a document in the local database
+   * @param documentId Document ID to be deleted
+   */
   public deleteDocument(documentId: string): boolean {
     let document: Document = this.database.getDocument(documentId);
     try {
@@ -336,6 +307,7 @@ export class CBLite extends Common {
     return document.isDeleted();
   }
 
+  /** Delete the local database */
   public deleteDatabase(): void {
     try {
       this.database.delete();
@@ -345,6 +317,10 @@ export class CBLite extends Common {
     }
   }
 
+  /**
+   * Create a pull replicator. It will pull documents from the remote server once it is started.
+   * @param remoteUrl Remote URL to replicate your documents
+   */
   public createPullReplication(remoteUrl: string): Replicator {
     let replication: Replication;
     try {
@@ -356,6 +332,10 @@ export class CBLite extends Common {
     return new Replicator(replication);
   }
 
+  /**
+   * Create a push replicator. It will push documents to the remote server once it is started.
+   * @param remoteUrl Remote URL to replicate your documents
+   */
   public createPushReplication(remoteUrl: string): Replicator {
     let replication: Replication;
     try {

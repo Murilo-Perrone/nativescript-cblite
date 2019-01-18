@@ -52,13 +52,7 @@ export interface Manager {
 export declare class Utils {
     static getApplicationContext(): any;
     static objectToMap(data: Object): any;
-    static mapToObject(data: any, recursive?: boolean): any;
-    static resolvePrimitiveType(data: any): any;
-    static isJavaPrimitive(data: any): boolean;
-    static isPrimitive(data: any): boolean;
-    static isDocument(data: any): boolean;
-    static isMap(data: any): boolean;
-    static isArrayList(data: any): boolean;
+    static mapToObject(data: any): any;
 }
 export declare class Replicator {
     private replicator;
