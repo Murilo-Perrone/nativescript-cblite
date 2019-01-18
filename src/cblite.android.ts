@@ -78,7 +78,7 @@ export class Utils {
 
   static objectToMap(data: Object) {
     try {
-      const gson = new com.google.gson.Gson()
+      const gson = new com.google.gson.Gson();
       return gson.fromJson(JSON.stringify(data), (new java.util.HashMap).getClass());
     } catch (e) {
       console.error('Failed to convert Object to Map', e.message);
@@ -91,10 +91,78 @@ export class Utils {
       const gson = new com.google.gson.Gson();
       const mappedObject = gson.toJson(data);
       return JSON.parse(mappedObject);
-    } catch(e) {
+    } catch (e) {
       console.error('Failed to convert Object to Map', e.message);
       throw new Error('Failed to convert Object to Map ' + e.message);
     }
+    /*
+
+    try {
+      if (types.isNullOrUndefined(data))
+        return data;
+
+      if (typeof (data) === 'boolean' || typeof (data) === 'string' || typeof (data) === 'number')
+        return data;
+
+      const typeName = data.getClass().getName();
+      switch (typeName) {
+        case 'java.lang.String':
+          return String(data);
+        case 'java.lang.Boolean':
+          return String(data) === 'true';
+        case 'java.lang.Integer':
+        case 'java.lang.Long':
+        case 'java.lang.Double':
+        case 'java.lang.Short':
+          return Number(data);
+
+        // case 'com.couchbase.lite.Dictionary':
+        //   const keys = data.getKeys();
+        //   const length = keys.size();
+        //   const object = {};
+        //   for (let i = 0; i < length; i++) {
+        //       const key = keys.get(i);
+        //       const nativeItem = data.getValue(key);
+        //       object[key] = Utils.mapToObject(nativeItem);
+        //   }
+        //   return object;
+
+        case 'java.util.ArrayList':
+          const arrayListValues = [];
+          for (let prop of data.toArray())
+            arrayListValues.push(prop);
+          return arrayListValues;
+
+        case 'java.util.LinkedHashMap':
+        case 'java.util.Collections$UnmodifiableMap':
+          const properties = data.entrySet().toArray();
+          const documentData: Object = {};
+          for (let prop of properties) {
+            let key = prop.getKey();
+            let value = Utils.mapToObject(prop.getValue());
+            documentData[key] = value;
+          }
+          return documentData;
+
+        // case 'com.couchbase.lite.Array':
+        //   const array = [];
+        //   const size = data.count();
+        //   for (let i = 0; i < size; i++) {
+        //       const nativeItem = data.getValue(i);
+        //       const item = Utils.mapToObject(nativeItem);
+        //       array.push(item);
+        //   }
+        //   return array;
+        default:
+          console.error('Type not found: ' + typeName);
+          return data;
+        }
+
+    } catch (e) {
+      console.error('Failed to convert Map to Object', e.message);
+      throw new Error('Failed to convert Map to Object ' + e.message);
+    }
+    */
   }
 }
 
@@ -167,7 +235,7 @@ export class Replicator {
   ): void {
     let date = new java.util.Date(expirationDate.getTime());
     this.replicator.setCookie(name, value, path, date, secure, httpOnly);
-  };
+  }
 
   /** Not used yet */
   public deleteCookie(name: string): void {
@@ -281,7 +349,8 @@ export class CBLite extends Common {
    */
   public updateDocument(documentId: string, data: any): void {
     let document: Document = this.database.getDocument(documentId);
-    let temp: any = Utils.mapToObject(document);
+    // Obtaining document's latest revision to avoid conflicts
+    let temp: any = Utils.mapToObject(document.getProperties());
     data._id = temp._id;
     data._rev = temp._rev;
     try {
