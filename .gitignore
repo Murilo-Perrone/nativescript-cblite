@@ -19,7 +19,7 @@ demo/lib
 demo/platforms
 node_modules
 publish/src
-publish/package
+# publish/package
 demo/report/report.html
 demo/report/stats.json
 ipremios-view-model.ts
