@@ -324,6 +324,8 @@ export class CBLite extends Common {
   public createDocument(data: Object, documentId?: string): string {
     let _documentId: string = '';
     let document: Document;
+    if (documentId == null)
+      documentId = (<any>data)._id;
     if (documentId) {
       _documentId = documentId;
       document = this.database.getDocument(documentId);
