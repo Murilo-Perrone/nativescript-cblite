@@ -7,7 +7,7 @@ Yet under development
 ## Installation
 
 ```javascript
-tns plugin add <nativescript-cblite>
+tns plugin add nativescript-cblite
 ```
 
 ## Usage 
@@ -33,6 +33,11 @@ Reading a local document
 cblite.getDocument('myDocumentId');
 ```
 
+Updating local document
+```typescript
+cblite.updateDocument('myDocumentId', {newData: 'My new data string'});
+```
+
 ## Replicating your documents with a SyncGateway server
 First you need to import the proper classes
 ```typescript
@@ -54,6 +59,34 @@ pullReplicator.setContinuous(true);
 pullReplicator.setAuthenticator('username', 'password');
 pullReplicator.start();
 ```
+
+# API Reference
+
+#### Class CBLite
+| Method name | Parameters | Return type |
+| - | - | - |
+| getDocument | documentId | Object |
+| listAllDocuments | - | string[] |
+| listAllReplications | - | string[] |
+| addDatabaseChangeListener | callback | void |
+| createDocument | data, documentId | string |
+| updateDocument | documentId, data | void |
+| deleteDocument | documentId | boolean |
+| createPullReplication | remoteUrl | Replicator |
+| createPushReplication | remoteUrl | Replicator |
+
+#### Class Replicator
+| Method name | Parameters | Return type |
+| - | - | - |
+| start | - | void |
+| stop | -  | void |
+| isRunning | - | boolean |
+| addReplicationChangeListener | changeListenerCallback | void |
+| setAuthenticator | username, password | void |
+| setContinuous | continuous | void |
+| setDocumentIds | docIds | void |
+| setCookie | name, value, path, expirationDate, secure, httpOnly | void |
+| deleteCookie | name | void |
 
 #### More documentation incoming soon
 ## License
