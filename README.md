@@ -1,40 +1,61 @@
-# Your Plugin Name
+# NativeScript CB-Lite
 
-Add your plugin badges here. See [nativescript-urlhandler](https://github.com/hypery2k/nativescript-urlhandler) for example.
+A plugin for Couchbase Lite on NativeScript. 
 
-Then describe what's the purpose of your plugin. 
-
-In case you develop UI plugin, this is where you can add some screenshots.
-
-## (Optional) Prerequisites / Requirements
-
-Describe the prerequisites that the user need to have installed before using your plugin. See [nativescript-firebase plugin](https://github.com/eddyverbruggen/nativescript-plugin-firebase) for example.
+Yet under development
 
 ## Installation
 
-Describe your plugin installation steps. Ideally it would be something like:
-
 ```javascript
-tns plugin add <your-plugin-name>
+tns plugin add <nativescript-cblite>
 ```
 
 ## Usage 
 
-Describe any usage specifics for your plugin. Give examples for Android, iOS, Angular if needed. See [nativescript-drop-down](https://www.npmjs.com/package/nativescript-drop-down) for example.
-	
-	```javascript
-    Usage code snippets here
-    ```)
+First you need to import the main class
+```typescript
+import { CBLite } from 'nativescript-cblite';
+```
 
-## API
+Then you need to instantiate the `CBLite` class
+```typescript
+const cblite = new CBLite('databaseName');
+```
 
-Describe your plugin methods and properties here. See [nativescript-feedback](https://github.com/EddyVerbruggen/nativescript-feedback) for example.
-    
-| Property | Default | Description |
-| --- | --- | --- |
-| some property | property default value | property description, default values, etc.. |
-| another property | property default value | property description, default values, etc.. |
-    
+Creating a local document
+```typescript
+cblite.createDocument({name: 'John Doe', age: 99}, 'myDocumentId');
+```
+
+Reading a local document
+```typescript
+// It will return a JSON object or false if the document does not exist
+cblite.getDocument('myDocumentId');
+```
+
+## Replicating your documents with a SyncGateway server
+First you need to import the proper classes
+```typescript
+import { CBLite, Replicator } from 'nativescript-cblite';
+```
+Then you need to instantiate those classes
+```typescript
+const cblite = new CBLite('databaseName');
+const pushReplicator: Replicator = cblite.createPushReplication('myRemoteUrl');
+const pullReplicator: Replicator = cblite.createPullReplication('myRemoteUrl');
+```
+Setting up the replication
+```typescript
+pushReplicator.setContinuous(true);
+pushReplicator.setAuthenticator('username', 'password');
+pushReplicator.start();
+
+pullReplicator.setContinuous(true);
+pullReplicator.setAuthenticator('username', 'password');
+pullReplicator.start();
+```
+
+#### More documentation incoming soon
 ## License
 
 Apache License Version 2.0, January 2004
