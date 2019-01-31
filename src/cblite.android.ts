@@ -46,6 +46,7 @@ export interface Database {
   getAllDocs(options: any);
   getAllReplications();
   getDocument(documentId: string);
+  getAttachment(ownerDocumentId: string, attachmentId: string): any;
   getDocumentCount();
   getExistingDocument(documentId: string);
   getExistingLocalDocument(documentId: string);
@@ -280,6 +281,18 @@ export class CBLite extends Common {
       console.error('Failed to get document data', e.message);
       throw new Error('Failed to get document data ' + e.message);
     }
+  }
+
+  /** Returns a ByteArray */
+  public getAttachment(ownerDocumentId: string, attachmentId: string): any {
+    const document = this.database.getExistingDocument(ownerDocumentId);
+    if (document == null) return null;
+    const currentRevision = document.getCurrentRevision();
+    if (currentRevision == null) return null;
+    const attachment = currentRevision.getAttachment(attachmentId);
+    const contentStream = attachment.getContent();
+    const content = contentStream.buf;
+    return content;
   }
 
   /** List all documents in the local database */

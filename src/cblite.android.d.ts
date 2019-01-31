@@ -38,6 +38,7 @@ export interface Database {
     getAllDocs(options: any): any;
     getAllReplications(): any;
     getDocument(documentId: string): any;
+    getAttachment(ownerDocumentId: string, attachmentId: string): any;
     getDocumentCount(): any;
     getExistingDocument(documentId: string): any;
     getExistingLocalDocument(documentId: string): any;
@@ -73,6 +74,7 @@ export declare class CBLite extends Common {
     private manager;
     constructor(databaseName: string);
     getDocument(documentId: string): Object;
+    getAttachment(ownerDocumentId: string, attachmentId: string): any;
     listAllDocuments(): string[];
     listAllReplications(): string[];
     addDatabaseChangeListener(callback: any): void;

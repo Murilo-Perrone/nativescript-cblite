@@ -1,6 +1,5 @@
 import { Common } from './cblite.common';
-
-interface Document {
+export interface Document {
     delete(): any;
     getCurrentRevision(): any;
     getCurrentRevisionId(): any;
@@ -11,8 +10,7 @@ interface Document {
     isDeleted(): any;
     putProperties(data: any): any;
 }
-
-interface Replication {
+export interface Replication {
     addChangeListener(changeListener: any): any;
     deleteCookie(name: string): any;
     getAuthenticator(): any;
@@ -29,8 +27,7 @@ interface Replication {
     start(): any;
     stop(): any;
 }
-
-interface Database {
+export interface Database {
     addChangeListener(listener: any): any;
     close(): any;
     createDocument(): any;
@@ -41,26 +38,25 @@ interface Database {
     getAllDocs(options: any): any;
     getAllReplications(): any;
     getDocument(documentId: string): any;
+    getAttachment(ownerDocumentId: string, attachmentId: string): any;
     getDocumentCount(): any;
     getExistingDocument(documentId: string): any;
     getExistingLocalDocument(documentId: string): any;
 }
-
-interface Manager {
+export interface Manager {
     allOpenDatabases(): any;
     forgetDatabase(): any;
     getAllDatabaseNames(): any;
     getContext(): any;
     getDatabase(name: string, mustExist?: boolean): any;
 }
-
 export declare class Utils {
     static getApplicationContext(): any;
     static objectToMap(data: Object): any;
     static mapToObject(data: any): any;
 }
-
 export declare class Replicator {
+    private replicator;
     constructor(replicator: Replication);
     start(): void;
     stop(): void;
@@ -72,10 +68,13 @@ export declare class Replicator {
     setCookie(name: string, value: string, path: string, expirationDate: Date, secure: boolean, httpOnly: boolean): void;
     deleteCookie(name: string): void;
 }
-
 export declare class CBLite extends Common {
+    private context;
+    private database;
+    private manager;
     constructor(databaseName: string);
     getDocument(documentId: string): Object;
+    getAttachment(ownerDocumentId: string, attachmentId: string): any;
     listAllDocuments(): string[];
     listAllReplications(): string[];
     addDatabaseChangeListener(callback: any): void;
