@@ -77,6 +77,34 @@ export class Utils {
     return utils.ad.getApplicationContext();
   }
 
+  static getCouchbaseManager() {
+    try {
+      const context = Utils.getApplicationContext();
+      const manager = new com.couchbase.lite.Manager(
+        new com.couchbase.lite.android.AndroidContext(context),
+        null
+      );
+      return manager;
+    } catch (e) {
+      console.error('Failed to create manager', e.message);
+      throw new Error('Failed to create manager ' + e.message);
+    }
+  }
+
+  static startCBLListener(listenPort: number = DEFAULT_LISTEN_PORT): string {
+    const manager = Utils.getCouchbaseManager();
+    const allowedCredentials = new com.couchbase.lite.listener.Credentials();
+    const listener = new com.couchbase.lite.listener.LiteListener(
+      manager, listenPort, allowedCredentials);
+    const boundPort: number = listener.getListenPort();
+    if (boundPort > 0) {
+      const thread = new java.lang.Thread(listener);
+      thread.start();
+      return `http://${allowedCredentials.getLogin()}:${allowedCredentials.getPassword()}@localhost:${listenPort}/`;
+    }
+    return null;
+  }
+
   static objectToMap(data: Object) {
     try {
       const gson = new com.google.gson.Gson();
@@ -244,11 +272,12 @@ export class Replicator {
   }
 }
 
+const DEFAULT_LISTEN_PORT = 5984;
 export class CBLite extends Common {
-
   private context: any;
   private database: Database;
   private manager: Manager;
+  private liteServSuccess: boolean = false;
 
   /**
    * Create a new instance of CBLite
@@ -256,17 +285,25 @@ export class CBLite extends Common {
    */
   constructor(databaseName: string) {
     super(databaseName);
-    this.context = Utils.getApplicationContext();
-    try {
-      this.manager = new com.couchbase.lite.Manager(
-        new com.couchbase.lite.android.AndroidContext(this.context),
-        null
-      );
-      this.database = this.manager.getDatabase(databaseName);
+    this.manager = Utils.getCouchbaseManager();
+    this.database = this.manager.getDatabase(databaseName);
+  }
+
+  private static listenerUrl: string;
+	public static initCBLite(): string {
+		try {
+      if (this.listenerUrl == null) {
+        com.couchbase.lite.router.URLStreamHandlerFactory.registerSelfIgnoreError();
+        com.couchbase.lite.View.setCompiler(new com.couchbase.lite.javascript.JavaScriptViewCompiler());
+        com.couchbase.lite.Database.setFilterCompiler(
+          new com.couchbase.lite.javascript.JavaScriptReplicationFilterCompiler());
+        this.listenerUrl = Utils.startCBLListener();
+        console.log("initCBLite() completed successfully");
+      }
     } catch (e) {
-      console.error('Failed to create manager', e.message);
-      throw new Error('Failed to create manager ' + e.message);
+      console.error(e);
     }
+    return this.listenerUrl;
   }
 
   /**

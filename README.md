@@ -2,7 +2,7 @@
 
 A plugin for Couchbase Lite on NativeScript. 
 
-Yet under development
+Yet under development (Android version working, iOS pending).
 
 ## Installation
 
@@ -15,6 +15,11 @@ tns plugin add nativescript-cblite
 First you need to import the main class
 ```typescript
 import { CBLite } from 'nativescript-cblite';
+```
+
+In case you'll use the REST api, the following command will initialize it and provide the base url:
+```typescript
+const url = Utils.startCBLListener();
 ```
 
 Then you need to instantiate the `CBLite` class

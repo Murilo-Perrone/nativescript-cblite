@@ -52,6 +52,8 @@ export interface Manager {
 }
 export declare class Utils {
     static getApplicationContext(): any;
+    static getCouchbaseManager(): any;
+    static startCBLListener(listenPort?: number): string;
     static objectToMap(data: Object): any;
     static mapToObject(data: any): any;
 }
@@ -72,7 +74,10 @@ export declare class CBLite extends Common {
     private context;
     private database;
     private manager;
+    private liteServSuccess;
     constructor(databaseName: string);
+    private static listenerUrl;
+    static initCBLite(): string;
     getDocument(documentId: string): Object;
     getAttachment(ownerDocumentId: string, attachmentId: string): any;
     listAllDocuments(): string[];

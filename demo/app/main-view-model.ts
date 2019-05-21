@@ -1,5 +1,5 @@
 import { Observable } from 'tns-core-modules/data/observable';
-import { CBLite, Replicator } from 'nativescript-cblite';
+import { CBLite, Replicator, Utils } from 'nativescript-cblite';
 
 export class HelloWorldModel extends Observable {
   public message: string;
@@ -7,5 +7,6 @@ export class HelloWorldModel extends Observable {
   constructor() {
     super();
     // Do your tests here
+    this.message = Utils.startCBLListener();
   }
 }

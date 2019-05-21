@@ -52,6 +52,7 @@ export interface Manager {
 }
 export declare class Utils {
     static getApplicationContext(): any;
+    static startCBLListener(listenPort?: number): string;
     static objectToMap(data: Object): any;
     static mapToObject(data: any): any;
 }
@@ -69,6 +70,7 @@ export declare class Replicator {
     deleteCookie(name: string): void;
 }
 export declare class CBLite extends Common {
+    static initCBLite(): string;
     private context;
     private database;
     private manager;

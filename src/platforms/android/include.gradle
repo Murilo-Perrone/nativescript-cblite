@@ -3,7 +3,16 @@ android {
 }
 
 dependencies {
-    compile 'com.couchbase.lite:couchbase-lite-android:1.4.4'
+    implementation 'com.couchbase.lite:couchbase-lite-android:1.4.4'
+    // To access the database through HTTP (often used for hybrid development and peer-to-peer sync).
+    implementation 'com.couchbase.lite:couchbase-lite-java-listener:1.4.4'
+    // To use ForestDB as the storage type.
+    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:1.4.4'
+	// To enable encryption on SQLite databases.
+    compile 'com.couchbase.lite:couchbase-lite-android-sqlcipher:1.4.4'
+    // JavaScript view (map/reduce) engine for the REST API.    
+    compile 'com.couchbase.lite:couchbase-lite-java-javascript:1.4.4'
+    
     compile 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.code.gson:gson:2.8.5'
 }
