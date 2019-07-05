@@ -94,13 +94,15 @@ export class Utils {
   static startCBLListener(listenPort: number = DEFAULT_LISTEN_PORT): string {
     const manager = Utils.getCouchbaseManager();
     const allowedCredentials = new com.couchbase.lite.listener.Credentials();
+    const username = allowedCredentials.getLogin();
+    const password = allowedCredentials.getPassword();
     const listener = new com.couchbase.lite.listener.LiteListener(
       manager, listenPort, allowedCredentials);
     const boundPort: number = listener.getListenPort();
     if (boundPort > 0) {
       const thread = new java.lang.Thread(listener);
       thread.start();
-      return `http://${allowedCredentials.getLogin()}:${allowedCredentials.getPassword()}@localhost:${listenPort}/`;
+      return `http://${username}:${password}@localhost:${boundPort}/`;
     }
     return null;
   }
@@ -318,6 +320,16 @@ export class CBLite extends Common {
       console.error('Failed to get document data', e.message);
       throw new Error('Failed to get document data ' + e.message);
     }
+  }
+
+  public hasAttachment(ownerDocumentId: string, attachmentId: string): boolean {
+    const document = this.database.getExistingDocument(ownerDocumentId);
+    if (document == null) return false;
+    const currentRevision = document.getCurrentRevision();
+    if (currentRevision == null) return false;
+    const attachment = currentRevision.getAttachment(attachmentId);
+    const length = attachment.getLength();
+    return length > 0;
   }
 
   /** Returns a ByteArray */
