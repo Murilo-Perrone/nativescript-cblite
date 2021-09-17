@@ -72,13 +72,14 @@ export declare class Replicator {
 }
 export declare class CBLite extends Common {
     private context;
-    private database;
+    public database: Database;
     private manager;
     private liteServSuccess;
     constructor(databaseName: string);
     private static listenerUrl;
     static initCBLite(): string;
     getDocument(documentId: string): Object;
+    hasAttachment(ownerDocumentId: string, attachmentId: string): boolean;
     getAttachment(ownerDocumentId: string, attachmentId: string): any;
     listAllDocuments(): string[];
     listAllReplications(): string[];

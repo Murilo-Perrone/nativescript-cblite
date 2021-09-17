@@ -7,6 +7,7 @@ export class HelloWorldModel extends Observable {
   constructor() {
     super();
     // Do your tests here
-    this.message = Utils.startCBLListener();
+    this.message = CBLite.initCBLite();
+    let db = new CBLite("testdb");
   }
 }

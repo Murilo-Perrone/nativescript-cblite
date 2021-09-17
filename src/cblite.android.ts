@@ -277,7 +277,7 @@ export class Replicator {
 const DEFAULT_LISTEN_PORT = 5984;
 export class CBLite extends Common {
   private context: any;
-  private database: Database;
+  public database: Database;
   private manager: Manager;
   private liteServSuccess: boolean = false;
 
@@ -292,8 +292,8 @@ export class CBLite extends Common {
   }
 
   private static listenerUrl: string;
-	public static initCBLite(): string {
-		try {
+  public static initCBLite(): string {
+    try {
       if (this.listenerUrl == null) {
         com.couchbase.lite.router.URLStreamHandlerFactory.registerSelfIgnoreError();
         com.couchbase.lite.View.setCompiler(new com.couchbase.lite.javascript.JavaScriptViewCompiler());
@@ -339,6 +339,8 @@ export class CBLite extends Common {
     const currentRevision = document.getCurrentRevision();
     if (currentRevision == null) return null;
     const attachment = currentRevision.getAttachment(attachmentId);
+    if (attachment == null)
+      return null;
     const contentStream = attachment.getContent();
     const content = contentStream.buf;
     return content;

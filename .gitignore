@@ -23,3 +23,5 @@ publish/package
 demo/report/report.html
 demo/report/stats.json
 ipremios-view-model.ts
+src/platforms/ios/**/*.*
+!src/platforms/ios/Podfile

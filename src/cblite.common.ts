@@ -1,3 +1,7 @@
+
 export class Common {
-  constructor(databaseName: string) {}
+  constructor(private databaseName: string) {
+    
+  }
 }
+

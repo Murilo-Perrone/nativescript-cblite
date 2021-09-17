@@ -1,8 +1,11 @@
 # NativeScript CB-Lite
 
-A plugin for Couchbase Lite on NativeScript. 
+A plugin for Couchbase Lite on NativeScript supporting LiteServ internal REST operations.
 
-Yet under development (Android version working, iOS pending).
+## Status
+
+Android version working but yet in CBL 1.4.4. iOS still pending some code. For a complete and updated plugin check:
+https://github.com/triniwiz/nativescript-couchbase-plugin
 
 ## Installation
 
